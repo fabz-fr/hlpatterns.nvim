@@ -50,6 +50,7 @@ function M.setup(opts)
 	end
 
 	require('hlpatterns.highlight_manager').setup(M.merged_opts)
+	require('hlpatterns.user_commands')
 end
 
 return M
