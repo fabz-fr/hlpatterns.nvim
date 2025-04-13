@@ -11,28 +11,40 @@ function HighlightManager.generate_random_color()
 	return string.format("%02X%02X%02X", r, g, b)
 end
 
--- @function Highlight custom pattern
--- @param pattern: string pattern to highlight
-function HighlightManager.highlight_pattern(pattern)
-	pattern = pattern or vim.fn.expand("<cword>")
+-- @function Highlight pattern
+-- @param pattern : Pattern to highlight
+-- bgcolor : background color value as a string
+-- fg : frontground color value as a string
+-- isFixed : Boolean value that can be set if the color shall not be disabled (todo)
+function HighlightManager.highlight(pattern, bgcolor, fgcolor, isFixed)
+	local group = HighlightManager.opts.fgcolor .. HighlightManager.nbhighlight
+	local pattern_id = vim.fn.matchadd(group, '\\<' .. pattern .. '\\>', HighlightManager.opts.highlight_priority)
+
 	if pattern == "" then
 		print("No word found under the cursor.")
 		return
 	end
 
-	HighlightManager.nbhighlight = HighlightManager.nbhighlight + 1
-	local group = HighlightManager.opts.fgcolor .. HighlightManager.nbhighlight
-	local bgcolor = HighlightManager.generate_random_color()
-
-	local id = vim.fn.matchadd(group, '\\<' .. pattern .. '\\>', HighlightManager.opts.highlight_priority)
-	if id ~= 0 then
-		vim.cmd('highlight ' .. group .. ' guibg=#' .. bgcolor .. ' guifg=#' .. HighlightManager.opts.fgcolor)
-
-		local value = { id = id, value = pattern }
-		table.insert(HighlightManager.highlight_ids, value)
-	else
+	if pattern_id == 0 then
 		print("Failed to add match for pattern: " .. pattern)
+		return
 	end
+
+	vim.cmd('highlight ' .. group .. ' guibg=#' .. bgcolor .. ' guifg=#' .. fgcolor)
+
+	local value = { id = pattern_id, value = pattern }
+	table.insert(HighlightManager.highlight_ids, value)
+	HighlightManager.nbhighlight = HighlightManager.nbhighlight + 1
+end
+
+-- @function Highlight custom pattern
+-- @param pattern: string pattern to highlight
+function HighlightManager.highlight_pattern(pattern)
+	pattern = pattern or vim.fn.expand("<cword>")
+	local bgcolor = HighlightManager.generate_random_color()
+	local fgcolor = HighlightManager.opts.fgcolor
+
+	HighlightManager.highlight(pattern, bgcolor, fgcolor, false)
 end
 
 -- @function Get the selected text in visual mode
@@ -49,6 +61,22 @@ function HighlightManager.list()
 	print("Highlight list:")
 	for idx, pattern in ipairs(HighlightManager.highlight_ids) do
 		print("\t-".. idx .. " pattern: '" .. pattern.value .. "' with ID:" .. pattern.id)
+	end
+end
+
+-- @function Delete highlighted on pattern
+-- @param list of patterns to delete
+function HighlightManager.delete(pattern_index)
+	-- reverse index list to remove from big indexes to small indexes and avoid table indexes update issues
+	table.sort(pattern_index, function(a, b) return a > b end) 
+
+	for _, index in ipairs(pattern_index) do 
+		local pattern = HighlightManager.highlight_ids[index]
+		if pattern ~= nil then 
+			print("pattern is " ..vim.inspect(pattern))
+			pcall(vim.fn.matchdelete, pattern.id)
+			table.remove(HighlightManager.highlight_ids, index)
+		end
 	end
 end
 

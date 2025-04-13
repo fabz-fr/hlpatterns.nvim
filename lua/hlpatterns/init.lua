@@ -4,7 +4,6 @@ local min_color = 50
 local max_color = 200
 
 M.default_opts = {
-	-- color handling,
 	min_color = min_color,
 	max_color = max_color,
 	highlight_priority = 100,
@@ -49,8 +48,7 @@ function M.setup(opts)
 		M.merged_opts.min_blue_color = M.merged_opts.min_color
 	end
 
-	require('hlpatterns.highlight_manager').setup(M.merged_opts)
-	require('hlpatterns.user_commands')
+	require('hlpatterns.user_commands').setup(M.merged_opts)
 end
 
 return M

@@ -64,6 +64,8 @@ Usage
 Several functions are available to the user : 
 - `HlpatternsAdd()` to highlight a user-defined pattern
 - `HlpatternsDeleteAll()` to delete all highlights
+- `HlpatternDelete()` to delete custom highlight (no argument will remove all highlight)
+- `HlpatternsList()` to list all highlights
 
 # Contributing
 
@@ -75,6 +77,10 @@ License
 # todolist
 ~~0. mAKE PLUGIN WORK !~~
 ~~1. Add variable to handles keymaps (N and V)~~
-2. Give access to the list of highlight
-3. Add a way to remove highlight
+~~2. Give access to the list of highlight~~
+~~3. Add a way to remove highlight~~
+4. Add the possibility to add custom color
+5. Revert light theme dark theme
+6. Add fixed color
+7. Add fixed color in config
 
