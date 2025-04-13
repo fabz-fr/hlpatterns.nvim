@@ -2,7 +2,7 @@
 local HighlightManager = {}
 HighlightManager.nbhighlight = 0
 
--- @Function to generate a random color (but not too bright)
+-- @Function Generate a random color (but not too bright)
 -- @return a string containing the rgb value generated
 function HighlightManager.generate_random_color()
 	local r = math.random(HighlightManager.opts.min_red_color, HighlightManager.opts.max_red_color)
@@ -11,7 +11,7 @@ function HighlightManager.generate_random_color()
 	return string.format("%02X%02X%02X", r, g, b)
 end
 
--- @function to highlight custom pattern
+-- @function Highlight custom pattern
 -- @param pattern: string pattern to highlight
 function HighlightManager.highlight_pattern(pattern)
 	pattern = pattern or vim.fn.expand("<cword>")
@@ -24,16 +24,18 @@ function HighlightManager.highlight_pattern(pattern)
 	local group = HighlightManager.opts.fgcolor .. HighlightManager.nbhighlight
 	local bgcolor = HighlightManager.generate_random_color()
 
-	local match_id = vim.fn.matchadd(group, '\\<' .. pattern .. '\\>', HighlightManager.opts.highlight_priority)
-	if match_id ~= 0 then
+	local id = vim.fn.matchadd(group, '\\<' .. pattern .. '\\>', HighlightManager.opts.highlight_priority)
+	if id ~= 0 then
 		vim.cmd('highlight ' .. group .. ' guibg=#' .. bgcolor .. ' guifg=#' .. HighlightManager.opts.fgcolor)
-		table.insert(HighlightManager.highlight_ids, match_id)
+
+		local value = { id = id, value = pattern }
+		table.insert(HighlightManager.highlight_ids, value)
 	else
 		print("Failed to add match for pattern: " .. pattern)
 	end
 end
 
--- @function to get the selected text in visual mode
+-- @function Get the selected text in visual mode
 -- @return the selected text
 local function get_visual_selection()
 	vim.cmd.normal { vim.fn.mode(), bang = true }
@@ -42,15 +44,24 @@ local function get_visual_selection()
 	return table.concat(vim.fn.getregion(vstart, vend), "\n")
 end
 
--- @user command to delete all highlighted pattern
-function HighlightManager.delete_all_highlights()
-	for _, match_id in ipairs(HighlightManager.highlight_ids) do
-		pcall(vim.fn.matchdelete, match_id)
+-- @function List highlight patterns
+function HighlightManager.list()
+	print("Highlight list:")
+	for idx, pattern in ipairs(HighlightManager.highlight_ids) do
+		print("\t-".. idx .. " pattern: '" .. pattern.value .. "' with ID:" .. pattern.id)
 	end
-	HighlightManager.highlight_ids = {}
 end
 
--- Setup function to configure keymaps
+-- @function Delete all highlighted pattern
+function HighlightManager.delete_all_highlights()
+	for _, pattern in ipairs(HighlightManager.highlight_ids) do
+		pcall(vim.fn.matchdelete, pattern.id)
+	end
+	HighlightManager.highlight_ids = {}
+	HighlightManager.nbhighlight = 0
+end
+
+-- @function Init and configure keymaps
 function HighlightManager.setup(opts)
 	if opts == nil then
 		error("Missing configuration options. Please provide a table with configuration options.")
@@ -96,6 +107,15 @@ vim.api.nvim_create_user_command(
 	{ nargs = 1, desc = 'Highlight a custom pattern' }
 )
 
+-- @user command to list all highlight patterns enable
+-- @param opts : string pattern to highlight
+vim.api.nvim_create_user_command(
+	'HlpatternsList',
+	function(opts)
+		HighlightManager.list()
+	end,
+	{ nargs = 0, desc = 'List highlighted patterns' }
+)
 
 
 return HighlightManager
