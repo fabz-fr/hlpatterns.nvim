@@ -79,7 +79,7 @@ License
 ~~1. Add variable to handles keymaps (N and V)~~
 ~~2. Give access to the list of highlight~~
 ~~3. Add a way to remove highlight~~
-4. Add the possibility to add custom color
+~~4. Add the possibility to add custom color~~
 5. Revert light theme dark theme
 6. Add fixed color
 7. Add fixed color in config

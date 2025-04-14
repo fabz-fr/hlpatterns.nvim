@@ -41,9 +41,25 @@ function M.setup(opts)
 	vim.api.nvim_create_user_command(
 		'HlpatternsAdd',
 		function(opts)
-			get_highlight_manager().highlight_pattern(opts.args)
+			get_highlight_manager().highlight_custom(opts.args)
 		end,
-		{ nargs = 1, desc = 'Highlight a custom pattern' }
+		{ nargs = 1, desc = 'Highlight a pattern' }
+	)
+
+	-- @user command to add highlight on a user defined pattern
+	-- @param opts : string pattern to highlight
+	vim.api.nvim_create_user_command(
+		'HlpatternsAddCustom',
+		function(opts)
+			local size = #opts.fargs
+			if size ~= 3 then
+				print("Error: args should be <pattern> <bgcolor> <fgcolor>")
+				return
+			end
+
+			get_highlight_manager().highlight_custom(opts.fargs[1], opts.fargs[2], opts.fargs[3])
+		end,
+		{ nargs = "*", desc = 'Highlight a pattern with custom highlight param are <pattern> <bgcolor> <fgcolor>' }
 	)
 
 	-- @user command to list all highlight patterns enable

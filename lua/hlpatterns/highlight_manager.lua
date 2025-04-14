@@ -37,6 +37,14 @@ function HighlightManager.highlight(pattern, bgcolor, fgcolor, isFixed)
 	HighlightManager.nbhighlight = HighlightManager.nbhighlight + 1
 end
 
+-- @function Highlight custom pattern with custom highlight
+-- @param pattern: string pattern to highlight
+-- @param bgcolor: Background color
+-- @param fgcolor: front color
+function HighlightManager.highlight_custom(pattern, bgcolor, fgcolor)
+	HighlightManager.highlight(pattern, bgcolor, fgcolor, false)
+end
+
 -- @function Highlight custom pattern
 -- @param pattern: string pattern to highlight
 function HighlightManager.highlight_pattern(pattern)
