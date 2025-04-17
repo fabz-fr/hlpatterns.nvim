@@ -13,12 +13,13 @@ end
 
 -- @function Highlight pattern
 -- @param pattern : Pattern to highlight
+-- @param label: Name of the pattern
 -- bgcolor : background color value as a string
 -- fg : frontground color value as a string
 -- isFixed : Boolean value that can be set if the color shall not be disabled (todo)
-function HighlightManager.highlight(pattern, bgcolor, fgcolor, isFixed)
+function HighlightManager.highlight(pattern, label, bgcolor, fgcolor, isFixed)
 	local group = HighlightManager.opts.fgcolor .. HighlightManager.nbhighlight
-	local pattern_id = vim.fn.matchadd(group, '\\<' .. pattern .. '\\>', HighlightManager.opts.highlight_priority)
+	local pattern_id = vim.fn.matchadd(group, pattern , HighlightManager.opts.highlight_priority)
 
 	if pattern == "" then
 		print("No word found under the cursor.")
@@ -26,13 +27,13 @@ function HighlightManager.highlight(pattern, bgcolor, fgcolor, isFixed)
 	end
 
 	if pattern_id == 0 then
-		print("Failed to add match for pattern: " .. pattern)
+		print("vim.match add failed for pattern : " .. pattern)
 		return
 	end
 
 	vim.cmd('highlight ' .. group .. ' guibg=#' .. bgcolor .. ' guifg=#' .. fgcolor)
 
-	local value = { id = pattern_id, value = pattern }
+	local value = { id = pattern_id, value = pattern, label = label }
 	table.insert(HighlightManager.highlight_ids, value)
 	HighlightManager.nbhighlight = HighlightManager.nbhighlight + 1
 end
@@ -41,8 +42,25 @@ end
 -- @param pattern: string pattern to highlight
 -- @param bgcolor: Background color
 -- @param fgcolor: front color
-function HighlightManager.highlight_custom(pattern, bgcolor, fgcolor)
-	HighlightManager.highlight(pattern, bgcolor, fgcolor, false)
+function HighlightManager.highlight_custom(pattern, label, bgcolor, fgcolor)
+	if pattern == nil then
+		print("arg1 shall contain a pattern string value")
+		return
+	end
+
+	if label == nil then
+		label = "<no label>"
+	end
+
+	if bgcolor == nil and fgcolor == nil then
+		bgcolor = HighlightManager.generate_random_color()
+		fgcolor = HighlightManager.opts.fgcolor
+	elseif bgcolor == nil and fgcolor ~= nil or bgcolor ~= nil and fgcolor == nil then
+		print("arg bgcolor and fg color shall be set together")
+		return
+	end
+
+	HighlightManager.highlight(pattern, label, bgcolor, fgcolor, false)
 end
 
 -- @function Highlight custom pattern
@@ -68,7 +86,7 @@ end
 function HighlightManager.list()
 	print("Highlight list:")
 	for idx, pattern in ipairs(HighlightManager.highlight_ids) do
-		print("\t-".. idx .. " pattern: '" .. pattern.value .. "' with ID:" .. pattern.id)
+		print("\t+ "..  pattern.label .. ": '" .. pattern.value .. "' with ID:" .. pattern.id)
 	end
 end
 

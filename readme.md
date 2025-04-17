@@ -83,4 +83,5 @@ License
 5. Revert light theme dark theme
 6. Add fixed color
 7. Add fixed color in config
+~~8. Add labels~~
 
